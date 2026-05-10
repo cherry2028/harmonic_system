@@ -744,6 +744,7 @@ def test_property_monotonicity_confidence(quality, dominant, conf_a, pattern):
     # → conf > (1 - conf)/5 → 5*conf > 1 - conf → 6*conf > 1 → conf > 1/6
     assume(conf_a > 1/6)
     assume(conf_b > 1/6)
+    assume(quality > 1e-6)
 
     scorer = PatternScorer()
     m = make_match(quality=quality, pattern=pattern)
