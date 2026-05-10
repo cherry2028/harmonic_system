@@ -32,7 +32,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from probability_utils import SimplexProjector
+from market_state.probability_utils import SimplexProjector
 from market_state.vector import MarketStateVector
 from signals.gate import (
     GateResult,
