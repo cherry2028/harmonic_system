@@ -9,12 +9,14 @@ Philosophy:
     Readable with tail -f. Queryable with jq.
     Never blocks the main pipeline. Never raises.
 
-Event types (5 total for Week 1):
+Event types (7 total — 5 from Week 1, 2 added in Week 2):
     market_state    : Every classification result
     gate_block      : Every hostile market gate trigger
     detector_detail : Full per-detector breakdown (debug mode only)
     scan_cycle      : Every pipeline execution summary
     error           : Any caught exception
+    signal_delivered : Every successfully delivered trading signal
+    daily_counter_block : Signal blocked by daily frequency cap
 
 File layout:
     logs/telemetry/
@@ -23,6 +25,8 @@ File layout:
         detector_detail.jsonl
         scan_cycle.jsonl
         error.jsonl
+        signal_delivered.jsonl
+        daily_counter_block.jsonl
 
 Each JSONL record:
     {
@@ -97,17 +101,17 @@ def _write(event_type: str, payload: Dict[str, Any]) -> None:
 # ---------------------------------------------------------------------------
 
 def log_state(
-    vector,                          # MarketStateVector
-    fusion_result=None,              # FusionResult (optional)
+    vector: MarketStateVector,
+    fusion_result: Optional[FusionResult] = None
 ) -> None:
-    if vector is None:
-        return
     """
     Logs every MarketStateVector produced by the engine.
-
-    Called in: pipeline.py after every state classification.
-    Volume: once per scan cycle per (symbol, timeframe) pair.
+    ...
     """
+
+    if vector is None:
+        return
+
     payload = {
         "symbol":       vector.symbol,
         "timeframe":    vector.timeframe,
@@ -283,3 +287,65 @@ def set_debug_mode(enabled: bool) -> None:
     global DEBUG_MODE
     DEBUG_MODE = enabled
     logger.info(f"Telemetry debug mode: {enabled}")
+def log_signal(
+    signal,
+    risk_reward: float=0.0,
+    risk_pct: float=0.0,
+    max_per_day: int=0,
+) -> None:
+    """
+    Logs every successfully delivered trading signal.
+
+    Called in: pipeline.py immediately after Telegram delivery succeeds.
+    """
+
+    if signal is None:
+        return
+
+    try:
+        _write("signal_delivered", {
+            "symbol": signal.symbol,
+            "timeframe": signal.timeframe,
+            "pattern": signal.pattern_name,
+            "direction": signal.direction,
+            "tier": signal.tier,
+            "edge_score": round(signal.edge_score, 4),
+            "entry": signal.entry,
+            "stop": signal.stop,
+            "target1": signal.target1,
+            "market_state": getattr(signal, "dominant_state", None),
+            "risk_reward": round(float(getattr(signal, "risk_reward", 0.0)), 3),
+            "risk_pct": getattr(signal, "risk_pct", 0.0),
+            "base_score": getattr(signal, "base_score", signal.edge_score),
+            "state_discount": getattr(signal, "state_discount", 1.0),
+            "max_per_day": getattr(signal, "max_per_day", max_per_day),
+            "reasoning_lines": len(signal.reasoning),
+            "conf_weight": round(float(getattr(signal, "confidence_weight", 1.0)), 4),
+    })
+    except Exception:
+        return
+
+
+def log_daily_counter_block(
+    symbol: str,
+    timeframe: str,
+    tier: str,
+    current_count: int,
+    max_count: int,
+    edge_score: float,
+) -> None:
+    """
+    Logs every signal blocked by the daily frequency cap.
+    """
+    try:
+        _write("daily_counter_block", {
+            "symbol": symbol,
+            "timeframe": timeframe,
+            "tier": tier,
+            "current_count": current_count,
+            "max_count": max_count,
+            "edge_score": round(float(edge_score), 4),
+            "utc_date": datetime.now(timezone.utc).date().isoformat(),
+        })
+    except Exception:
+        return   
