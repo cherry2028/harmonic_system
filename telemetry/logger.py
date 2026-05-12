@@ -68,6 +68,13 @@ logger = logging.getLogger("telemetry")
 
 TELEMETRY_DIR  = Path("logs/telemetry")
 DEBUG_MODE     = False   # Set True to enable detector_detail events
+_VALID_SCAN_OUTCOMES = {
+    "gate_blocked",
+    "no_swings",
+    "no_patterns",
+    "below_threshold",
+    "signal_published",
+}
 
 # ---------------------------------------------------------------------------
 # Internal writer — the only function that touches disk
@@ -236,6 +243,11 @@ def log_scan_cycle(
 
     Called in: pipeline.py at the end of every scan_one() call.
     """
+    if outcome not in _VALID_SCAN_OUTCOMES:
+        logger.error(
+            f"Invalid scan outcome: {outcome!r}"
+        )
+        outcome = f"INVALID:{outcome}"
     _write("scan_cycle", {
         "symbol":      symbol,
         "timeframe":   timeframe,

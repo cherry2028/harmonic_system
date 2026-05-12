@@ -83,7 +83,7 @@ _VALID_TIERS: FrozenSet[str] = frozenset({"A+", "A", "B", "C"})
 # MarketStateConfig
 # ---------------------------------------------------------------------------
 
-@dataclass
+@dataclass(frozen=True)
 class MarketStateConfig:
     """
     Single configuration object for the entire Market State +
