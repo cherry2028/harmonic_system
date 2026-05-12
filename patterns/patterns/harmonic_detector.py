@@ -40,7 +40,7 @@ Logging levels:
 
 from __future__ import annotations
 
-from patterns.patterns.institutional_swing_detector import *
+from institutional_swing_detector import *
 from patterns.patterns.institutional_candidate_extractor import (
     StructuralCandidateExtractor,
     ExtractorConfig,

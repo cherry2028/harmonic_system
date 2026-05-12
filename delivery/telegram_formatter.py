@@ -219,8 +219,17 @@ class TelegramFormatter:
         chat_id:   Optional[str] = None,
         dry_run:   bool          = False,
     ) -> None:
-        self._bot_token = bot_token or os.getenv("TELEGRAM_BOT_TOKEN", "")
-        self._chat_id   = chat_id   or os.getenv("TELEGRAM_CHANNEL_ID", "")
+        self._bot_token = (
+            str(bot_token).strip()
+            if bot_token is not None
+            else str(os.getenv("TELEGRAM_BOT_TOKEN", "")).strip()
+        )
+
+        self._chat_id = (
+            str(chat_id).strip()
+            if chat_id is not None
+            else str(os.getenv("TELEGRAM_CHANNEL_ID", "")).strip()
+        )
         self._dry_run   = dry_run
 
         logger.debug(
@@ -325,32 +334,35 @@ class TelegramFormatter:
             )
 
         # Step 3: Config check
-        if not self._bot_token:
+
+        if not self._bot_token or str(self._bot_token).strip() == "":
             error = (
                 "TELEGRAM_BOT_TOKEN is not set. "
                 "Set the environment variable or pass bot_token at construction."
             )
             logger.error(error)
+
             return SendResult(
-                success = False,
-                message = message,
-                error   = error,
-                dry_run = False,
-                chat_id = self._chat_id,
+                success=False,
+                message=message,
+                error=error,
+                dry_run=False,
+                chat_id=self._chat_id,
             )
 
-        if not self._chat_id:
+        if not self._chat_id or str(self._chat_id).strip() == "":
             error = (
                 "TELEGRAM_CHANNEL_ID is not set. "
                 "Set the environment variable or pass chat_id at construction."
             )
             logger.error(error)
+
             return SendResult(
-                success = False,
-                message = message,
-                error   = error,
-                dry_run = False,
-                chat_id = "",
+                success=False,
+                message=message,
+                error=error,
+                dry_run=False,
+                chat_id=self._chat_id,
             )
 
         # Step 4: HTTP POST
