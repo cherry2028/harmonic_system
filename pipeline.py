@@ -1,9 +1,11 @@
 """pipeline.py — ScanPipeline integration layer (Action 10)
 
-Gate 0: ScanResult dataclass only.
-Implementation will proceed incrementally through Gates 1–8.
+Gate 0: ScanResult dataclass.
+Gate 1: ScanPipeline skeleton with dependency injection.
+Gate 2: Stage 1–2 execution (data fetch + state classification + telemetry).
 """
 from __future__ import annotations
+import time
 from dataclasses import dataclass, field
 from typing import List, Optional
 
@@ -53,7 +55,6 @@ class ScanResult:
         return self.outcome == "signal_published"
 
 
-
 # ─────────────────────────────────────────────────────────────────────────────
 # Gate 1: ScanPipeline skeleton — dependency injection architecture
 # ─────────────────────────────────────────────────────────────────────────────
@@ -68,6 +69,7 @@ from scoring.pattern_scorer import PatternScorer
 from signals.gate import HostileMarketGate
 from signals.tier import SignalTier
 from signals.daily_counter import DailyCounter
+from telemetry.logger import TelemetryLogger
 from delivery.presentation import SignalPresentation
 from delivery.telegram_formatter import TelegramFormatter
 
@@ -90,7 +92,7 @@ class ScanPipeline:
         hostile_gate: HostileMarketGate,
         signal_tier: SignalTier,
         daily_counter: DailyCounter,
-        telemetry,
+        telemetry: TelemetryLogger,
         signal_presentation: SignalPresentation,
         telegram_formatter: TelegramFormatter,
     ) -> None:
@@ -136,10 +138,56 @@ class ScanPipeline:
         ScanResult
             Immutable record of the scan outcome.
         """
-        # Gate 1: signature only — execution logic in subsequent gates
-        raise NotImplementedError(
-            "scan_one() execution logic not yet implemented — "
-            "proceed to Gate 2 for Stage 1–2 wiring"
+        t0 = time.perf_counter()
+        try:
+            return self._run_scan(symbol, timeframe, dry_run, t0)
+        except Exception as e:
+            duration_ms = (time.perf_counter() - t0) * 1000
+            self._telemetry.log_error("pipeline.scan_one", str(e), symbol, timeframe)
+            return ScanResult(
+                symbol=symbol,
+                timeframe=timeframe,
+                outcome="error",
+                duration_ms=duration_ms,
+                error=str(e),
+            )
+
+    # ── Internal execution stages ───────────────────────────────────────────
+
+    def _run_scan(self, symbol: str, timeframe: str, dry_run: bool, t0: float) -> ScanResult:
+        """Stages 1–2: Data acquisition and market state classification."""
+        # Stage 1: Data acquisition
+        df = self._data_fetcher.fetch(symbol, timeframe, bars=300)
+        if df is None or getattr(df, "empty", True):
+            duration_ms = (time.perf_counter() - t0) * 1000
+            self._telemetry.log_error(
+                "pipeline.data_fetch",
+                "fetch returned None or empty DataFrame",
+                symbol,
+                timeframe,
+            )
+            return ScanResult(
+                symbol=symbol,
+                timeframe=timeframe,
+                outcome="fetch_failed",
+                duration_ms=duration_ms,
+            )
+
+        # Stage 2: Market state classification
+        vector, fusion_result = self._market_state_engine.classify_with_detail(
+            df, symbol, timeframe
+        )
+        if hasattr(self._telemetry, "log_state"):
+            self._telemetry.log_state(vector, fusion_result)
+
+        duration_ms = (time.perf_counter() - t0) * 1000
+        # Gate 2 ends here — subsequent gates extend below
+        return ScanResult(
+            symbol=symbol,
+            timeframe=timeframe,
+            outcome="below_threshold",
+            duration_ms=duration_ms,
+            vector=vector,
         )
 
     # ── Introspection helpers (testable contract verification) ──────────────

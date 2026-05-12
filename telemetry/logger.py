@@ -348,4 +348,13 @@ def log_daily_counter_block(
             "utc_date": datetime.now(timezone.utc).date().isoformat(),
         })
     except Exception:
-        return   
+        return 
+        
+class TelemetryLogger:
+    @staticmethod
+    def log_error(*args, **kwargs):
+        return log_error(*args, **kwargs)
+
+    @staticmethod
+    def log_state(*args, **kwargs):
+        return log_state(*args, **kwargs)
