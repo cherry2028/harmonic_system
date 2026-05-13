@@ -70,6 +70,41 @@ class MarketStateVector:
     symbol:    str = ""
     timeframe: str = ""
     bar_index: int = 0
+    def __post_init__(self) -> None:
+        fields = (
+            "trending",
+            "ranging",
+            "expansion",
+            "compression",
+            "reversal",
+            "news_chaos",
+        )
+
+        for name in fields:
+            value = getattr(self, name)
+
+            if not isinstance(value, (int, float)):
+                raise ValueError(f"{name} must be numeric")
+
+            if not (0.0 <= float(value) <= 1.0):
+                raise ValueError(
+                    f"{name}={value} outside valid probability range [0.0, 1.0]"
+                )
+
+    @property
+    def state_probs(self) -> Dict[str, float]:
+        """
+        Returns the six state probabilities as a plain dict.
+        """
+
+        return {
+            "trending": self.trending,
+            "ranging": self.ranging,
+            "expansion": self.expansion,
+            "compression": self.compression,
+            "reversal": self.reversal,
+            "news_chaos": self.news_chaos,
+        }
 
     # ------------------------------------------------------------------ #
     # Core Properties                                                      #
