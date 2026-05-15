@@ -140,43 +140,41 @@ def load_csv(path: str) -> pd.DataFrame:
         if ts_col is not None:
             df = pd.read_csv(
                 p,
-                skiprows=1,
                 low_memory=False
             )
 
-            df["Date"] = pd.to_datetime(
-                df["Date"],
+            df["timestamp"] = pd.to_datetime(
+                df["timestamp"],
                 format="mixed",
                 dayfirst=True
             )
-            df = df.sort_values("Date")
+            df = df.sort_values("timestamp")
 
             df = df.drop_duplicates(
-                subset="Date",
+                subset="timestamp",
                 keep="last",
             )
-            df = df.set_index("Date")
+            df = df.set_index("timestamp")
             df.index.name = "timestamp"
         else:
             # No obvious timestamp column — try loading as-is and see if
             # the first column parses as dates
             df = pd.read_csv(
                 p,
-                skiprows=1,
                 low_memory=False
             )
 
-            df["Date"] = pd.to_datetime(
-                df["Date"],
+            df["timestamp"] = pd.to_datetime(
+                df["timestamp"],
                 format="mixed",
                 dayfirst=True
             )
-            df = df.sort_values("Date")
+            df = df.sort_values("timestamp")
             df = df.drop_duplicates(
-                subset="Date",
+                subset="timestamp",
                 keep="last"
             )
-            df = df.set_index("Date")
+            df = df.set_index("timestamp")
             df.index.name = "timestamp"
 
     except Exception as e:
