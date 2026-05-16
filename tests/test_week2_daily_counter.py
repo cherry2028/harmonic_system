@@ -642,7 +642,7 @@ class TestThreadSafety:
             data    = json.loads(file_path.read_text())
             on_disk = data.get("C", {}).get("ETHUSDT", 0)
 
-        assert in_memory == 100, f"In-memory={in_memory}, expected 100"
+        assert in_memory == 100, f"In-event_memory={in_memory}, expected 100"
         # on_disk may lag slightly (last write wins) but must be close
         assert on_disk >= 90, (
             f"On-disk={on_disk}, expected ~100 (last write wins — some lag ok)"

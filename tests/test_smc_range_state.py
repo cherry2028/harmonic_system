@@ -6,10 +6,10 @@ from market_state.smc.range_state import (
 
 def test_detects_ranging_market():
     candles = [
-        Candle(high=101, low=99, close=100),
-        Candle(high=102, low=100, close=101),
-        Candle(high=101.5, low=99.5, close=100.5),
-        Candle(high=102, low=99.8, close=101),
+        Candle(high=100.2, low=99.8, close=100),
+        Candle(high=100.3, low=99.9, close=100.1),
+        Candle(high=100.25, low=99.85, close=100),
+        Candle(high=100.2, low=99.9, close=100.05),
     ]
 
     state = detect_range(candles)

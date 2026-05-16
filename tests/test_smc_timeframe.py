@@ -18,6 +18,8 @@ def test_creates_timeframe_context():
             is_ranging=True,
             range_high=105,
             range_low=100,
+            previous_range_high=105,
+            previous_range_low=100,
             equilibrium=102.5,
             range_width_pct=0.02,
         ),
@@ -32,7 +34,7 @@ def test_creates_timeframe_context():
         ),
         setup=SetupState(
             bearish_setup=True,
-            bullish_setup=False,
+            
         ),
     )
 

@@ -140,7 +140,7 @@ def load_csv(path: str) -> pd.DataFrame:
         if ts_col is not None:
             df = pd.read_csv(
                 p,
-                low_memory=False
+                low_event_memory=False
             )
 
             df["timestamp"] = pd.to_datetime(
@@ -161,7 +161,7 @@ def load_csv(path: str) -> pd.DataFrame:
             # the first column parses as dates
             df = pd.read_csv(
                 p,
-                low_memory=False
+                low_event_memory=False
             )
 
             df["timestamp"] = pd.to_datetime(

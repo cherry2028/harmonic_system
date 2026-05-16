@@ -4,12 +4,20 @@ from market_state.smc.bias import (
     BiasState,
     detect_bias,
 )
+from market_state.smc.displacement import (
+    DisplacementState,
+    detect_displacement,
+)
+from market_state.smc.event_memory import (
+    EventMemory,
+)
 from market_state.smc.liquidity import (
     LiquiditySweep,
     detect_liquidity_sweep,
 )
-from market_state.smc.memory import (
-    SetupMemory,
+from market_state.smc.premium_discount import (
+    PremiumDiscountState,
+    detect_premium_discount,
 )
 from market_state.smc.range_state import (
     Candle,
@@ -33,27 +41,50 @@ def build_timeframe_context(
     timeframe: str,
     candles: Sequence[Candle],
 ) -> TimeframeContext:
-    bias: BiasState = detect_bias(candles)
+    bias: BiasState = detect_bias(
+        candles
+    )
 
-    range_state: RangeState = detect_range(candles)
+    range_state: RangeState = detect_range(
+        candles
+    )
 
     latest_candle = candles[-1]
 
-    liquidity: LiquiditySweep = detect_liquidity_sweep(
-        candle=latest_candle,
-        range_high=range_state.range_high,
-        range_low=range_state.range_low,
+    liquidity: LiquiditySweep = (
+        detect_liquidity_sweep(
+            candle=latest_candle,
+            range_high=range_state.range_high,
+            range_low=range_state.range_low,
+        )
     )
 
-    structure: StructureShift = detect_structure_shift(
-        candles,
+    structure: StructureShift = (
+        detect_structure_shift(
+            candles,
+        )
     )
 
-    memory = SetupMemory(
-        recent_range_detected=range_state.is_ranging,
-        recent_liquidity_sweep=(
+    displacement: DisplacementState = (
+        detect_displacement(
+            list(candles),
+        )
+    )
+
+    premium_discount: (
+        PremiumDiscountState
+    ) = detect_premium_discount(
+        close_price=latest_candle.close,
+        range_state=range_state,
+    )
+
+    event_memory = EventMemory(
+        recent_sweep_high=(
             liquidity.swept_high
-            or liquidity.swept_low
+        ),
+
+        recent_bearish_shift=(
+            structure.bearish_shift
         ),
     )
 
@@ -62,7 +93,11 @@ def build_timeframe_context(
         range_state=range_state,
         liquidity=liquidity,
         structure=structure,
-        memory=memory,
+        event_memory=event_memory,
+        displacement=displacement,
+        premium_discount=(
+            premium_discount
+        ),
     )
 
     return TimeframeContext(

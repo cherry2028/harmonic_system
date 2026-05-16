@@ -27,6 +27,8 @@ def make_context(
             range_low=100,
             equilibrium=102.5,
             range_width_pct=0.02,
+            previous_range_high=105,
+            previous_range_low=100,
         ),
         liquidity=LiquiditySweep(
             swept_high=True,
@@ -39,7 +41,7 @@ def make_context(
         ),
         setup=SetupState(
             bearish_setup=bearish_setup,
-            bullish_setup=False,
+            
         ),
     )
 

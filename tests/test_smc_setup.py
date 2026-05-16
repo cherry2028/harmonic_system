@@ -1,8 +1,14 @@
 from market_state.smc.bias import BiasState
-from market_state.smc.liquidity import LiquiditySweep
-from market_state.smc.memory import (
-    SetupMemory,
+from market_state.smc.displacement import (
+    DisplacementState,
 )
+from market_state.smc.event_memory import (
+    EventMemory,
+)
+from market_state.smc.premium_discount import (
+    PremiumDiscountState,
+)
+from market_state.smc.liquidity import LiquiditySweep
 from market_state.smc.range_state import RangeState
 from market_state.smc.setup import evaluate_setup
 from market_state.smc.structure import StructureShift
@@ -19,6 +25,8 @@ def test_detects_bearish_setup():
         is_ranging=True,
         range_high=105,
         range_low=100,
+        previous_range_high=105,
+        previous_range_low=100,
         equilibrium=102.5,
         range_width_pct=0.02,
     )
@@ -34,9 +42,19 @@ def test_detects_bearish_setup():
         bearish_shift=True,
     )
 
-    memory = SetupMemory(
-        recent_range_detected=True,
-        recent_liquidity_sweep=True,
+    event_memory = EventMemory(
+        recent_sweep_high=True,
+        recent_bearish_shift=True,
+    )
+
+    displacement = DisplacementState(
+        bearish_displacement=True,
+    )
+    premium_discount = (
+        PremiumDiscountState(
+            in_premium=True,
+            in_discount=False,
+        )
     )
 
     result = evaluate_setup(
@@ -44,7 +62,9 @@ def test_detects_bearish_setup():
         range_state=range_state,
         liquidity=liquidity,
         structure=structure,
-        memory=memory,
+        event_memory=event_memory,
+        displacement=displacement,
+        premium_discount=premium_discount,
     )
 
     assert result.bearish_setup is True
