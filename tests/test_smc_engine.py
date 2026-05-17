@@ -7,6 +7,9 @@ from market_state.smc.range_state import RangeState
 from market_state.smc.setup import SetupState
 from market_state.smc.structure import StructureShift
 from market_state.smc.timeframe import TimeframeContext
+from market_state.smc.regime import (
+    RegimeState,
+)
 
 
 def make_context(
@@ -43,6 +46,10 @@ def make_context(
             bearish_setup=bearish_setup,
             
         ),
+        regime=RegimeState(
+            trending=True,
+            choppy=False,
+        ),
     )
 
 
@@ -51,16 +58,19 @@ def test_detects_bearish_alignment():
         htf=make_context(
             bearish_bias=True,
             bearish_setup=False,
+bearish_pressure=25,
             bearish_shift=False,
         ),
         itf=make_context(
             bearish_bias=True,
-            bearish_setup=True,
+            bearish_setup=true,
+bearish_pressure=75,
             bearish_shift=False,
         ),
         ltf=make_context(
             bearish_bias=True,
             bearish_setup=False,
+bearish_pressure=25,
             bearish_shift=True,
         ),
     )

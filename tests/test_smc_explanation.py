@@ -21,16 +21,19 @@ def test_explains_signal():
         htf=make_context(
             bearish_bias=True,
             bearish_setup=False,
+bearish_pressure=25,
             bearish_shift=False,
         ),
         itf=make_context(
             bearish_bias=True,
-            bearish_setup=True,
+            bearish_setup=true,
+bearish_pressure=75,
             bearish_shift=False,
         ),
         ltf=make_context(
             bearish_bias=True,
             bearish_setup=False,
+bearish_pressure=25,
             bearish_shift=True,
         ),
     )

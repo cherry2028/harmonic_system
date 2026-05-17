@@ -13,7 +13,9 @@ from market_state.smc.structure import StructureShift
 from market_state.smc.timeframe import (
     TimeframeContext,
 )
-
+from market_state.smc.regime import (
+    RegimeState,
+)
 
 def test_backtests_bearish_setup():
     candles = [
@@ -54,7 +56,12 @@ def test_backtests_bearish_setup():
         ),
 
         setup=SetupState(
-            bearish_setup=True,
+            bearish_setup=true,
+bearish_pressure=75,
+        ),
+        regime=RegimeState(
+            trending=True,
+            choppy=False,
         ),
     )
 

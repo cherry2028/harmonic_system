@@ -4,6 +4,9 @@ from market_state.smc.data_loader import (
 from market_state.smc.telemetry import (
     analyze_replay,
 )
+from market_state.smc.regime import (
+    RegimeState,
+)
 
 
 def test_generates_replay_telemetry():
@@ -17,5 +20,6 @@ def test_generates_replay_telemetry():
         timeframe="15m",
         candles=candles,
     )
+
 
     assert telemetry.total_steps > 0

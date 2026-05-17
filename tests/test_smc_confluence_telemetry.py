@@ -7,6 +7,9 @@ from market_state.smc.range_state import RangeState
 from market_state.smc.replay_engine import ReplayStep
 from market_state.smc.setup import SetupState
 from market_state.smc.structure import StructureShift
+from market_state.smc.regime import (
+    RegimeState,
+)
 from market_state.smc.timeframe import (
     TimeframeContext,
 )
@@ -44,7 +47,12 @@ def test_builds_confluence_telemetry():
         ),
 
         setup=SetupState(
-            bearish_setup=True,
+            bearish_setup=true,
+bearish_pressure=75,
+        ),
+        regime=RegimeState(
+            trending=True,
+            choppy=False,
         ),
     )
 

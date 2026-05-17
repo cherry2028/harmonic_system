@@ -13,6 +13,9 @@ from market_state.smc.mtf_replay import (
 from market_state.smc.replay_engine import (
     replay_timeframe,
 )
+from market_state.smc.setup_quality import (
+    evaluate_setup_quality,
+)
 
 
 SYMBOL = "BTCUSDT"
@@ -61,9 +64,9 @@ def run_sandbox():
     print()
 
     replay_steps = replay_mtf(
-        htf_candles=htf_candles,
-        itf_candles=itf_candles,
-        ltf_candles=ltf_candles,
+        htf_candles=htf_candles[-600:],
+        itf_candles=itf_candles[-9600:],
+        ltf_candles=ltf_candles[-28800:],
     )
 
     print("=" * 60)
@@ -74,6 +77,10 @@ def run_sandbox():
 
     for step in replay_steps[-5:]:
         context = step.context
+
+        quality = evaluate_setup_quality(
+            context
+        )
 
         latest_ltf = ltf_candles[
             step.step - 1
@@ -103,6 +110,16 @@ def run_sandbox():
         )
 
         print(
+            f"Setup Quality Score: "
+            f"{quality.score}"
+        )
+
+        print(
+            f"Confidence Grade: "
+            f"{quality.confidence}"
+        )
+
+        print(
             f"ITF Range High: "
             f"{context.itf.range_state.range_high}"
         )
@@ -125,6 +142,16 @@ def run_sandbox():
         print(
             f"ITF Bearish Setup: "
             f"{context.itf.setup.bearish_setup}"
+        )
+
+        print(
+            f"ITF Bullish FVG: "
+            f"{context.itf.fvg.bullish_fvg}"
+        )
+
+        print(
+            f"ITF Bearish FVG: "
+            f"{context.itf.fvg.bearish_fvg}"
         )
 
         print()

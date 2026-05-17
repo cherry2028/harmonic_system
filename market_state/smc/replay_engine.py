@@ -66,6 +66,7 @@ def replay_timeframe(
             liquidity=context.liquidity,
             structure=context.structure,
             event_memory=event_memory,
+            regime=context.regime,
             displacement=detect_displacement(
                 list(visible_candles)
             ),
@@ -88,6 +89,7 @@ def replay_timeframe(
             liquidity=context.liquidity,
             structure=context.structure,
             setup=updated_setup,
+            regime=context.regime,
         )
 
         steps.append(

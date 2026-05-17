@@ -7,23 +7,28 @@ from market_state.smc.scoring import (
 from tests.test_smc_engine import (
     make_context,
 )
-
+from market_state.smc.regime import (
+    RegimeState,
+)
 
 def test_scores_bearish_setup():
     context = MultiTimeframeContext(
         htf=make_context(
             bearish_bias=True,
             bearish_setup=False,
+bearish_pressure=25,
             bearish_shift=False,
         ),
         itf=make_context(
             bearish_bias=True,
-            bearish_setup=True,
+            bearish_setup=true,
+bearish_pressure=75,
             bearish_shift=False,
         ),
         ltf=make_context(
             bearish_bias=True,
             bearish_setup=False,
+bearish_pressure=25,
             bearish_shift=True,
         ),
     )

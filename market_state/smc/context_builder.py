@@ -35,6 +35,14 @@ from market_state.smc.structure import (
 from market_state.smc.timeframe import (
     TimeframeContext,
 )
+from market_state.smc.regime import (
+    RegimeState,
+    detect_regime,
+)
+from market_state.smc.fvg import (
+    detect_fvg,
+    FVGState,
+)
 
 
 def build_timeframe_context(
@@ -77,6 +85,14 @@ def build_timeframe_context(
         close_price=latest_candle.close,
         range_state=range_state,
     )
+    regime: RegimeState = (
+        detect_regime(
+            range_state=range_state,
+        )
+)
+    fvg: FVGState = detect_fvg(
+        candles=candles,
+    )
 
     event_memory = EventMemory(
         recent_sweep_high=(
@@ -96,8 +112,10 @@ def build_timeframe_context(
         event_memory=event_memory,
         displacement=displacement,
         premium_discount=(
-            premium_discount
+        premium_discount
         ),
+        regime=regime,
+        fvg=fvg,
     )
 
     return TimeframeContext(
@@ -107,4 +125,6 @@ def build_timeframe_context(
         liquidity=liquidity,
         structure=structure,
         setup=setup,
+        regime=regime,
+        fvg=fvg,
     )

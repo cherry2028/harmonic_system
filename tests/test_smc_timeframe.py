@@ -4,6 +4,9 @@ from market_state.smc.range_state import RangeState
 from market_state.smc.setup import SetupState
 from market_state.smc.structure import StructureShift
 from market_state.smc.timeframe import TimeframeContext
+from market_state.smc.regime import (
+    RegimeState,
+)
 
 
 def test_creates_timeframe_context():
@@ -33,8 +36,13 @@ def test_creates_timeframe_context():
             bearish_shift=True,
         ),
         setup=SetupState(
-            bearish_setup=True,
+            bearish_setup=true,
+bearish_pressure=75,
             
+        ),
+        regime=RegimeState(
+            trending=True,
+            choppy=False,
         ),
     )
 

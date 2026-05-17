@@ -8,6 +8,9 @@ from market_state.smc.event_memory import (
 from market_state.smc.premium_discount import (
     PremiumDiscountState,
 )
+from market_state.smc.regime import (
+    RegimeState,
+)
 from market_state.smc.liquidity import LiquiditySweep
 from market_state.smc.range_state import RangeState
 from market_state.smc.setup import evaluate_setup
@@ -56,6 +59,10 @@ def test_detects_bearish_setup():
             in_discount=False,
         )
     )
+    regime = RegimeState(
+        trending=True,
+        choppy=False,
+    )
 
     result = evaluate_setup(
         bias=bias,
@@ -65,6 +72,7 @@ def test_detects_bearish_setup():
         event_memory=event_memory,
         displacement=displacement,
         premium_discount=premium_discount,
+        regime=regime,
     )
 
     assert result.bearish_setup is True

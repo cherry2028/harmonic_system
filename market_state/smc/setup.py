@@ -7,17 +7,22 @@ from market_state.smc.displacement import (
 from market_state.smc.event_memory import (
     EventMemory,
 )
+from market_state.smc.fvg import FVGState
 from market_state.smc.liquidity import LiquiditySweep
 from market_state.smc.premium_discount import (
     PremiumDiscountState,
 )
 from market_state.smc.range_state import RangeState
+from market_state.smc.regime import (
+    RegimeState,
+)
 from market_state.smc.structure import StructureShift
 
 
 @dataclass(frozen=True)
 class SetupState:
     bearish_setup: bool
+    bearish_pressure: int
 
 
 def evaluate_setup(
@@ -28,29 +33,35 @@ def evaluate_setup(
     event_memory: EventMemory,
     displacement: DisplacementState,
     premium_discount: PremiumDiscountState,
+    regime: RegimeState,
+    fvg: FVGState,
 ) -> SetupState:
-    bearish_setup = all(
-        [
-            bias.bearish,
 
-            range_state.is_ranging,
+    bearish_pressure = 0
 
-            (
-                liquidity.swept_high
-                or event_memory.recent_sweep_high
-            ),
+    if bias.bearish:
+        bearish_pressure += 20
 
-            (
-                structure.bearish_shift
-                or event_memory.recent_bearish_shift
-            ),
+    if structure.bearish_shift:
+        bearish_pressure += 20
 
-            displacement.bearish_displacement,
+    if displacement.bearish_displacement:
+        bearish_pressure += 20
 
-            # premium_discount.in_premium,
-        ]
+    if liquidity.swept_high:
+        bearish_pressure += 15
+
+    if fvg.bearish_fvg:
+        bearish_pressure += 15
+
+    if regime.trending:
+        bearish_pressure += 10
+
+    bearish_setup = (
+        bearish_pressure >= 60
     )
 
     return SetupState(
         bearish_setup=bearish_setup,
+        bearish_pressure=bearish_pressure,
     )
